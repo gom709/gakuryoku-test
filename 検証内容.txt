@@ -1,0 +1,17 @@
+今回の検証結果
+
+- index.html: 再構成済み
+- app.js: 再構成済み
+- admin.html: Auth + RLS対応
+- config.js: 新規
+- supabase.sql: 新規
+- questions.js: 不足
+- styles.css: 不足
+- 想定問題数: 120問
+- 科目数: 7
+- 各科目制限時間: 6分
+- 最大試験時間: 42分
+
+重要:
+Supabase未設定でもテスト本体を動かせる構成に変更。
+ランキング・DB保存・管理画面のみSupabase設定が必要。
