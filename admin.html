@@ -1,157 +1,135 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>管理者 | 大人の小中学力テスト</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <style>
-    body{font-family:system-ui,sans-serif;margin:0;background:#f5f5f5;color:#222}
-    .wrap{max-width:1100px;margin:auto;padding:24px}
-    .card{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 2px 12px #0001}
-    input,button{font:inherit;padding:10px;border-radius:8px;border:1px solid #ccc}
-    button{cursor:pointer}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}
-    .hidden{display:none}
-    .error{color:#b00020}
-    @media(max-width:700px){table{font-size:13px}.wrap{padding:12px}.card{padding:14px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>管理者 | 大人の小中学力テスト</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#f5f5f5;color:#222}
+.wrap{max-width:1200px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 2px 12px #0001}
+input,button{font:inherit;padding:10px;border-radius:8px;border:1px solid #ccc;margin:4px}
+button{cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}
+.hidden{display:none}.error{color:#b00020}
+@media(max-width:700px){.wrap{padding:10px}.card{padding:14px}table{font-size:12px}}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <h1>管理者ダッシュボード</h1>
+<h1>管理者ダッシュボード</h1>
 
-  <section id="loginCard" class="card">
-    <h2>管理者ログイン</h2>
-    <p>Supabase Authで登録した管理者アカウントを使用してください。</p>
-    <input id="email" type="email" placeholder="メールアドレス" autocomplete="username">
-    <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
-    <button id="loginBtn">ログイン</button>
-    <p id="loginError" class="error"></p>
-  </section>
+<section id="loginCard" class="card">
+<h2>管理者ログイン</h2>
+<input id="email" type="email" placeholder="メールアドレス" autocomplete="username">
+<input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
+<button id="loginBtn">ログイン</button>
+<p id="loginError" class="error"></p>
+</section>
 
-  <section id="dashboard" class="hidden">
-    <div class="card">
-      <button id="logoutBtn">ログアウト</button>
-      <button id="reloadBtn">再読み込み</button>
-      <button id="csvBtn">CSV出力</button>
-      <p id="status"></p>
-    </div>
-
-    <div class="card">
-      <label>検索 <input id="search" type="search" placeholder="名前"></label>
-    </div>
-
-    <div class="card">
-      <h2>受験者結果</h2>
-      <div style="overflow:auto">
-        <table>
-          <thead><tr><th>日時</th><th>名前</th><th>総合</th><th>科目別</th></tr></thead>
-          <tbody id="resultsBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+<section id="dashboard" class="hidden">
+<div class="card">
+<button id="logoutBtn">ログアウト</button>
+<button id="reloadBtn">再読み込み</button>
+<button id="csvBtn">CSV出力</button>
+<input id="search" type="search" placeholder="名前で検索">
+<p id="status"></p>
+</div>
+<div class="card">
+<h2>全受験者結果</h2>
+<div style="overflow:auto">
+<table>
+<thead><tr><th>日時</th><th>名前</th><th>総合</th><th>科目別</th></tr></thead>
+<tbody id="resultsBody"></tbody>
+</table>
+</div>
+</div>
+</section>
 </div>
 
 <script>
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let allRows = [];
 
-function esc(v){
-  return String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
+function $(id){return document.getElementById(id)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
 async function isAdmin(){
-  const { data, error } = await client.rpc("is_admin");
+  const {data,error}=await client.rpc("is_admin");
   if(error) throw error;
-  return data === true;
+  return data===true;
 }
 
 async function login(){
-  $("loginError").textContent = "";
-  const email = $("email").value.trim();
-  const password = $("password").value;
-
-  const { error } = await client.auth.signInWithPassword({email,password});
-  if(error){
-    $("loginError").textContent = "ログインに失敗しました。";
-    return;
-  }
+  $("loginError").textContent="";
+  const {error}=await client.auth.signInWithPassword({
+    email:$("email").value.trim(),
+    password:$("password").value
+  });
+  if(error){$("loginError").textContent="ログインに失敗しました。";return}
   await boot();
 }
 
 async function boot(){
-  const { data:{session} } = await client.auth.getSession();
-
+  const {data:{session}}=await client.auth.getSession();
   if(!session){
     $("loginCard").classList.remove("hidden");
     $("dashboard").classList.add("hidden");
     return;
   }
-
   try{
     if(!(await isAdmin())) throw new Error("not_admin");
     $("loginCard").classList.add("hidden");
     $("dashboard").classList.remove("hidden");
     await loadResults();
   }catch(e){
+    console.error(e);
     await client.auth.signOut();
     $("loginCard").classList.remove("hidden");
     $("dashboard").classList.add("hidden");
-    $("loginError").textContent = "このアカウントには管理者権限がありません。";
+    $("loginError").textContent="このアカウントには管理者権限がありません。";
   }
 }
 
 async function loadResults(){
-  $("status").textContent = "読み込み中...";
-  const { data, error } = await client
-    .from("scores")
+  $("status").textContent="読み込み中...";
+  const {data,error}=await client.from("scores")
     .select("id,name,total,breakdown,created_at")
     .order("created_at",{ascending:false});
-
   if(error){
-    $("status").textContent = "結果取得に失敗しました。";
     console.error(error);
+    $("status").textContent="結果取得に失敗しました。";
     return;
   }
-
-  allRows = data || [];
+  allRows=data||[];
   render();
-  $("status").textContent = `${allRows.length}件`;
+  $("status").textContent=`${allRows.length}件`;
 }
 
 function render(){
-  const keyword = $("search").value.trim().toLowerCase();
-  const rows = allRows.filter(r => r.name.toLowerCase().includes(keyword));
-
-  $("resultsBody").innerHTML = rows.map(r => `
+  const k=$("search").value.trim().toLowerCase();
+  $("resultsBody").innerHTML=allRows.filter(r=>r.name.toLowerCase().includes(k)).map(r=>`
     <tr>
       <td>${esc(new Date(r.created_at).toLocaleString("ja-JP"))}</td>
       <td>${esc(r.name)}</td>
       <td>${r.total}/130</td>
-      <td>${Object.entries(r.breakdown || {}).map(([s,v]) =>
-        `${esc(s)} ${v.correct}/${v.total}`
-      ).join(" / ")}</td>
+      <td>${Object.entries(r.breakdown||{}).map(([s,v])=>`${esc(s)} ${v.correct}/${v.total}`).join(" / ")}</td>
     </tr>
   `).join("");
 }
 
-function $(id){return document.getElementById(id)}
-
 function csv(){
-  const header=["日時","名前","総合点","科目別"];
-  const lines=[header,...allRows.map(r=>[
+  const rows=[["日時","名前","総合点","科目別"]];
+  allRows.forEach(r=>rows.push([
     new Date(r.created_at).toLocaleString("ja-JP"),
-    r.name,
-    r.total,
+    r.name,r.total,
     Object.entries(r.breakdown||{}).map(([s,v])=>`${s}:${v.correct}/${v.total}`).join(" ")
-  ])];
-
-  const csvText = lines.map(row => row.map(v => `"${String(v).replaceAll('"','""')}"`).join(",")).join("\r\n");
-  const blob = new Blob(["\ufeff"+csvText],{type:"text/csv;charset=utf-8"});
+  ]));
+  const text=rows.map(row=>row.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\r\n");
+  const blob=new Blob(["\ufeff"+text],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download=`大人の小中学力テスト_結果_${new Date().toISOString().slice(0,10)}.csv`;

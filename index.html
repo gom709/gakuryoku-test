@@ -1,2 +1,77 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>大人の小中学力テスト</title><link rel="stylesheet" href="styles.css"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><div class="wrap"><header><h1>大人の小中学力テスト</h1><p>小学生〜中学2年生範囲・全130問</p></header><section id="start" class="card"><h2>受験者登録</h2><input id="name" maxlength="20" placeholder="ニックネーム（20文字まで）"><button id="startBtn">テストを開始</button><p class="note">各教科6分。時間切れで自動提出されます。</p></section><section id="quiz" class="hidden"><div class="topbar"><div><b id="subjectTitle"></b> <span id="progress"></span></div><div class="timer" id="timer">06:00</div></div><div id="questions"></div><div class="actions"><button id="submitBtn">この教科を提出</button></div></section><section id="result" class="hidden card"><h2>結果発表 🎓</h2><div id="summary"></div><button id="shareBtn" class="share">📤 結果をSNSで共有</button><p id="shareText" class="sharetext"></p><div class="chartbox"><canvas id="radar"></canvas></div><h3>110問の正答一覧</h3><div id="answerReview"></div><h3>ランキング</h3><div id="ranking"></div><button id="retryBtn">もう一度受験する</button></section></div><script src="config.js"></script>
-<script src="questions.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大人の小中学力テスト</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="questions.js"></script>
+</head>
+<body>
+<main class="container">
+  <section id="startScreen" class="screen">
+    <div class="card hero">
+      <h1>大人の小中学力テスト</h1>
+      <p>小学校〜中学2年生程度の学力を、7科目・全130問でチェック。</p>
+      <p>各科目の制限時間は<strong>6分</strong>です。</p>
+      <label for="name">名前</label>
+      <input id="name" maxlength="40" placeholder="ランキングに表示する名前">
+      <button class="primary" onclick="startTest()">テスト開始</button>
+      <p class="note">※受験者はログイン不要です。</p>
+    </div>
+  </section>
+
+  <section id="testScreen" class="screen hidden">
+    <div class="test-header">
+      <div>
+        <div class="eyebrow">大人の小中学力テスト</div>
+        <h2 id="subjectTitle">英語</h2>
+      </div>
+      <div class="timer-box">残り <strong id="timer">6:00</strong></div>
+    </div>
+    <form id="quizForm">
+      <div id="questionArea"></div>
+      <button id="submitButton" type="button" class="primary" onclick="submitSubject(false)">この科目を採点</button>
+    </form>
+  </section>
+
+  <section id="resultScreen" class="screen hidden">
+    <div id="scoreCard" class="card result-card">
+      <div class="eyebrow">RESULT</div>
+      <h1 id="resultName"></h1>
+      <div id="totalScore" class="total-score">0 / 130</div>
+      <p>大人の小中学力テスト 総合結果</p>
+      <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>科目</th><th>正解</th><th>正答率</th></tr></thead>
+          <tbody id="resultTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card share-card">
+      <button class="primary" onclick="shareResult()">SNSで結果をシェア</button>
+      <button onclick="window.print()">結果を保存・スクリーンショット</button>
+    </div>
+
+    <div class="card">
+      <h2>ランキング</h2>
+      <div id="rankingArea"><p>読み込み中...</p></div>
+    </div>
+
+    <div class="card">
+      <h2>正答一覧</h2>
+      <div id="reviewArea"></div>
+    </div>
+
+    <div class="card">
+      <button onclick="location.reload()">もう一度受験する</button>
+    </div>
+  </section>
+</main>
+</body>
+</html>
