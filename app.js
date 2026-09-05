@@ -83,7 +83,7 @@ async function submitSubject(auto){
 async function finish(){
   $("quiz").classList.add("hidden"); $("result").classList.remove("hidden");
   const total=Object.values(state.results).reduce((a,b)=>a+b,0);
-  $("summary").innerHTML=`<div class="scorebig">${total} / 110点</div>
+  $("summary").innerHTML=`<div class="scorebig">${total} / 120点</div>
   <p style="text-align:center">総合正答率 <b>${(total/110*100).toFixed(1)}%</b></p>`+
   SUBJECTS.map(s=>`<div class="subject-row"><span>${s}</span><b>${state.results[s]} / ${QUESTION_BANK[s].length}（${(state.results[s]/QUESTION_BANK[s].length*100).toFixed(1)}%）</b></div>`).join("");
   renderReview();
