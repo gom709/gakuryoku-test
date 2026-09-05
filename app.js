@@ -1,6 +1,6 @@
 const SUBJECTS = ["英語","算数","国語","社会","理科","音楽","美術"];
 const TIME_LIMIT = 6 * 60;
-const questionBank = window.QUESTIONS || {};
+const questionBank = (typeof QUESTIONS !== "undefined") ? QUESTIONS : {};
 const TOTAL_SCORE = SUBJECTS.reduce((sum, s) => sum + (Array.isArray(questionBank[s]) ? questionBank[s].length : 0), 0);
 
 const state = {
