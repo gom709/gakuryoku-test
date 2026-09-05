@@ -1,8 +1,8 @@
-# 大人の小中学力テスト 最終版セットアップ
+# 大人の小中学力テスト 修正版セットアップ
 
-## 1. GitHub Pagesへ配置
+## まずやること
 
-最終完成版ZIPの以下ファイルを、GitHub Pagesの公開フォルダへアップロードしてください。
+このフォルダのファイルをGitHub Pagesへアップロードしてください。
 
 - index.html
 - questions.js
@@ -12,155 +12,61 @@
 - config.js
 - supabase.sql
 
-## 2. Supabaseの設定
+## 1. config.js
 
-Supabase Dashboardでプロジェクトを作成します。
-
-Project Settings → API から以下を確認します。
-
-- Project URL
-- anon / publishable key
-
-`config.js` を開き、以下を書き換えます。
+Supabase Dashboard → Project Settings → API からProject URLとanon/publishable keyを取得し、config.jsを書き換えます。
 
 ```js
 const SUPABASE_URL = "あなたのSupabase URL";
 const SUPABASE_ANON_KEY = "あなたのanon key";
 ```
 
-### 重要
+service_role keyは絶対に入れないでください。
 
-`service_role` keyは絶対にGitHub Pagesへ置かないでください。
+## 2. supabase.sql
 
-## 3. データベースとRLSを設定
+Supabase Dashboard → SQL Editorで、supabase.sqlを丸ごと実行します。
 
-Supabase DashboardのSQL Editorを開き、`supabase.sql` の内容を丸ごと貼り付けて実行します。
+## 3. 管理者アカウント
 
-これにより以下が設定されます。
+Supabase Dashboard → Authentication → Users → Add user からメールアドレスとパスワードで管理者を作成します。
 
-- profilesテーブル
-- scoresテーブル
-- 管理者判定
-- RLS
-- 公開ランキング用RPC
+作成したユーザーのUser IDをコピーします。
 
-## 4. 管理者アカウントを作成
-
-Supabase Dashboardの
-
-Authentication → Users
-
-から管理者用のメールアドレスとパスワードを登録します。
-
-作成されたUser IDをコピーします。
-
-SQL Editorで以下を実行してください。
+SQL Editorで以下を実行します。
 
 ```sql
-insert into public.profiles (id, role)
-values ('ここにUser ID', 'admin')
-on conflict (id) do update set role='admin';
+insert into public.profiles(id,role)
+values ('ここにUser ID','admin')
+on conflict(id) do update set role='admin';
 ```
 
-これで、そのアカウントだけが管理画面から全受験結果を閲覧できます。
+「ここにUser ID」はAuthentication → Usersで作成したユーザーのUUIDです。メールアドレスではありません。
 
-## 5. index.html
+## 4. GitHub Pages
 
-`index.html` では、Supabase CDNの後、`questions.js` と `app.js` より前に `config.js` を読み込みます。
+既存ファイルは今回の修正版で上書きしてください。
 
-```html
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="questions.js"></script>
-<script src="app.js"></script>
-```
+questions.jsとstyles.cssも含めて丸ごとアップロードするのが安全です。
 
-最終完成版にはこの設定を反映済みです。
+## 5. 動作確認
 
-## 6. 受験者側
+受験者:
+index.html
 
-`index.html` を開くと、
+管理者:
+admin.html
 
-名前入力
-↓
-英語
-↓
-数学
-↓
-国語
-↓
-社会
-↓
-理科
-↓
-音楽
-↓
-美術
-↓
-自動採点
-↓
-結果画面
-↓
-ランキング保存
+各科目6分、7科目、全130問です。
 
-という流れになります。
+## 6. 今回の修正点
 
-各科目の制限時間は6分です。
+前版でindex.htmlとapp.jsのHTML IDが一致していなかった問題を修正しました。
 
-全7科目なので、最大42分です。
+また、画面表示を130問・7科目・6分/科目の仕様に統一しています。
 
-## 7. 管理者側
+管理者画面はSupabase Auth + RLSで保護しています。
 
-以下を開きます。
+## 7. 注意
 
-`admin.html`
-
-管理者メールアドレスとパスワードでログインすると、
-
-- 全受験者
-- 受験日時
-- 名前
-- 総合点
-- 科目別結果
-- 名前検索
-- CSV出力
-
-を確認できます。
-
-## 8. セキュリティ
-
-以前のJavaScript内に管理キーを書く方式は使用しません。
-
-今回の構成は、
-
-管理者ログイン
-↓
-Supabase Auth
-↓
-profiles.role = admin
-↓
-RLS
-↓
-scores閲覧
-
-という構成です。
-
-一般受験者はログイン不要です。
-
-また、一般ユーザーが直接`scores`の全データを閲覧できないようにし、公開ランキングには必要最低限の情報だけを返します。
-
-## 9. 重要な注意
-
-採点処理は現在ブラウザ側で行っています。
-
-そのため、技術的にはブラウザのJavaScriptを改変して、不正な高得点を送信することは可能です。
-
-今回のAuth + RLSで強化されるのは主に、
-
-- 管理画面への不正アクセス
-- データベースの無制限な閲覧
-- 管理者権限の偽装
-
-への対策です。
-
-本格的なランキング大会などで「結果の改ざんを完全に防ぎたい」場合は、次の段階としてサーバー側採点に変更する必要があります。
+現在の採点はブラウザ側です。ブラウザを改変すればスコアを偽装できるため、ランキングを厳密な競技として運用する場合はサーバー側採点が必要です。
