@@ -1,0 +1,17 @@
+大人の小中学力テスト 最終版
+
+【GitHub Pages】
+このフォルダの中身をそのままGitHub Pagesの公開フォルダへアップロードしてください。
+
+【必須設定】
+1. config.js の SUPABASE_URL と SUPABASE_ANON_KEY を自分のSupabaseプロジェクトの値へ変更
+2. Supabase SQL Editorで supabase.sql を実行
+3. Supabase Authentication > Users で管理者ユーザーを作成
+4. 作成したUser IDを使って profiles に role='admin' を登録
+5. GitHub Pagesへアップロード
+
+【管理画面】
+admin.html
+
+【重要】
+service_role key は config.js に入れないでください。
