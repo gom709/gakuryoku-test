@@ -7,7 +7,7 @@ const SUPABASE_URL = "https://ghuivkwpfeswjmefwwai.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodWl2a3dwZmVzd2ptZWZ3d2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MDQwMjUsImV4cCI6MjEwNDE4MDAyNX0.o3tULJESEHZjjpp6X4VjsTpYnEvrU8gOI2nfy9FXvSE";
 
 let db = null;
-if (SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY !== "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodWl2a3dwZmVzd2ptZWZ3d2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MDQwMjUsImV4cCI6MjEwNDE4MDAyNX0.o3tULJESEHZjjpp6X4VjsTpYnEvrU8gOI2nfy9FXvSE") {
+if (SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY) {
   db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
@@ -134,11 +134,12 @@ function renderRanking(rows){
 $("retryBtn").onclick=()=>location.reload();
 
 // 結果を保存する関数（例）
+// 修正後
 async function saveScore(name, totalScore) {
   if (!db) return;
   const { error } = await db
     .from('scores')
-    .insert([{ name: name, total_score: totalScore }]);
+    .insert([{ name: name, total: totalScore }]); // total_score から total に変更
 
   if (error) {
     console.error('スコアの保存に失敗しました:', error);
