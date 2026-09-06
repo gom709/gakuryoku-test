@@ -144,6 +144,7 @@ async function saveScore(name, totalScore) {
     console.error('スコアの保存に失敗しました:', error);
   }
 }
+
 // ランキングを取得して表示する関数（例）
 async function loadLeaderboard() {
   if (!db) return;
