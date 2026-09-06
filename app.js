@@ -80,12 +80,46 @@ async function submitSubject(auto){
   }
 }
 
-async function finish(){
-  $("quiz").classList.add("hidden"); $("result").classList.remove("hidden");
-  const total=Object.values(state.results).reduce((a,b)=>a+b,0);
-  $("summary").innerHTML=`<div class="scorebig">${total} / 120点</div>
-  <p style="text-align:center">総合正答率 <b>${(total/110*100).toFixed(1)}%</b></p>`+
-  SUBJECTS.map(s=>`<div class="subject-row"><span>${s}</span><b>${state.results[s]} / ${QUESTION_BANK[s].length}（${(state.results[s]/QUESTION_BANK[s].length*100).toFixed(1)}%）</b></div>`).join("");
+async function finish() {
+  $("quiz").classList.add("hidden");
+  $("result").classList.remove("hidden");
+  const total = Object.values(state.results).reduce((a, b) => a + b, 0);
+
+  // --- レベル判定 & メッセージ定義 ---
+  let levelTitle = "";
+  let levelComment = "";
+
+  if (total >= 110) {
+    levelTitle = "👑 超人・教授レベル！";
+    levelComment = "恐ろしい知性…！今すぐクイズ番組に出演するか、知識を鼻にかけて自慢して回りましょう！";
+  } else if (total >= 95) {
+    levelTitle = "🎓 高校生（進学校）レベル！";
+    levelComment = "素晴らしい記憶力！大人の経験値と知識が見事に融合した、文句なしの秀才です。";
+  } else if (total >= 80) {
+    levelTitle = "🏫 中学3年生レベル！";
+    levelComment = "高校受験なら余裕で合格圏内！社会人として十分すぎる教養をお持ちです。";
+  } else if (total >= 60) {
+    levelTitle = "🎒 小学6年生レベル！";
+    levelComment = "義務教育の基礎はバッチリ！「忘れてたけど見覚えはある」をしっかり正解に繋げられました。";
+  } else if (total >= 40) {
+    levelTitle = "🐥 小学3年生レベル！";
+    levelComment = "あれ…？昔習ったはずなのに…？社会に出て使わない知識は脳のゴミ箱に捨ててきたタイプですね！";
+  } else {
+    levelTitle = "🐣 ひよこ組（未就学児）レベル！";
+    levelComment = "大丈夫、社会で生きていくのに「台形の面積公式」はめったに使いません！伸びしろしかありません！";
+  }
+
+  // 結果画面のHTML描画
+  $("summary").innerHTML = `
+    <div class="level-box" style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-radius: 8px; text-align: center;">
+      <div style="font-size: 1.1rem; font-weight: bold; color: #0056b3;">あなたの判定結果</div>
+      <div style="font-size: 1.6rem; font-weight: bold; margin: 8px 0; color: #2c3e50;">${levelTitle}</div>
+      <p style="font-size: 0.95rem; margin: 0; color: #555;">${levelComment}</p>
+    </div>
+    <div class="scorebig">${total} / 120点</div>
+    <p style="text-align:center">総合正答率 <b>${(total/110*100).toFixed(1)}%</b></p>` + 
+    SUBJECTS.map(s => `<div class="subject-row"><span>${s}</span><b>${state.results[s]} / ${QUESTION_BANK[s].length}（${(state.results[s]/QUESTION_BANK[s].length*100).toFixed(1)}%）</b></div>`).join("");
+
   renderReview();
   renderRadar();
   await saveAndLoadRanking(total);
