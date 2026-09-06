@@ -117,7 +117,7 @@ async function finish() {
       <p style="font-size: 0.95rem; margin: 0; color: #555;">${levelComment}</p>
     </div>
     <div class="scorebig">${total} / 120点</div>
-    <p style="text-align:center">総合正答率 <b>${(total/110*100).toFixed(1)}%</b></p>` + 
+    <p style="text-align:center">総合正答率 <b>${(total/120*100).toFixed(1)}%</b></p>` + 
     SUBJECTS.map(s => `<div class="subject-row"><span>${s}</span><b>${state.results[s]} / ${QUESTION_BANK[s].length}（${(state.results[s]/QUESTION_BANK[s].length*100).toFixed(1)}%）</b></div>`).join("");
 
   renderReview();
@@ -166,40 +166,4 @@ function renderRanking(rows){
   $("ranking").innerHTML=rows.map((r,i)=>`<div class="rank"><b>${i+1}位</b>　${esc(r.name)}　<b>${r.total}点</b><span class="small">　${new Date(r.created_at).toLocaleString("ja-JP")}</span></div>`).join("");
 }
 $("retryBtn").onclick=()=>location.reload();
-
-// 結果を保存する関数（例）
-// 修正後
-async function saveScore(name, totalScore) {
-  if (!db) return;
-  const { error } = await db
-    .from('scores')
-    .insert([{ name: name, total: totalScore }]); // total_score から total に変更
-
-  if (error) {
-    console.error('スコアの保存に失敗しました:', error);
-  }
-}
-
-// ランキングを取得して表示する関数（例）
-async function loadLeaderboard() {
-  if (!db) return;
-  const { data, error } = await db
-    .from('scores')
-    .select('name, total_score')
-    .order('total_score', { ascending: false })
-    .limit(10);
-
-  if (error) {
-    console.error('ランキングの取得に失敗しました:', error);
-    return;
-  }
-
-  // HTML側で用意した <ol id="rankingList"></ol> などに出力する
-  const listEl = $("rankingList");
-  if (listEl) {
-    listEl.innerHTML = data.map((item, index) => 
-      `<li>${index + 1}位: ${esc(item.name)} - ${item.total_score}点</li>`
-    ).join('');
-  }
-}
 
