@@ -13,11 +13,16 @@
 <header><h1>大人の小中学力テスト</h1><p>小学生〜中学2年生範囲・全120問</p></header>
 
 <section id="start" class="card">
-<h2>受験者登録</h2>
-<p>名前を入力してください。ランキング表示に使用します。</p>
-<input id="name" maxlength="20" placeholder="ニックネーム（20文字まで）">
-<button id="startBtn">テストを開始</button>
-<p class="note">※各教科は個別制限時間です。時間切れになると自動提出されます。</p>
+  <h2>受験者登録</h2>
+  <p>名前を入力してください。ランキング表示に使用します。</p>
+  <input id="name" maxlength="20" placeholder="ニックネーム（20文字まで）">
+  <button id="startBtn">テストを開始</button>
+  <p class="note">※各教科は個別制限時間です。時間切れになると自動提出されます。</p>
+
+  <!-- 👇 ここを追加 -->
+  <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
+  <h3>現在のランキング</h3>
+  <div id="startRanking"></div>
 </section>
 
 <section id="quiz" class="hidden">
