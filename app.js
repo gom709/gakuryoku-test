@@ -120,9 +120,12 @@ async function finish() {
     <p style="text-align:center">総合正答率 <b>${(total/120*100).toFixed(1)}%</b></p>` + 
     SUBJECTS.map(s => `<div class="subject-row"><span>${s}</span><b>${state.results[s]} / ${QUESTION_BANK[s].length}（${(state.results[s]/QUESTION_BANK[s].length*100).toFixed(1)}%）</b></div>`).join("");
 
-  renderReview();
+　renderReview();
   renderRadar();
-  await saveAndLoadRanking(total);
+  
+  // 保存した後にランキングを再描画
+  await saveScore(total);
+  await loadAndRenderRanking();
 }
 
 function renderReview(){
@@ -148,22 +151,81 @@ function renderRadar(){
   },options:{scales:{r:{min:0,max:100,ticks:{stepSize:20}}},plugins:{legend:{display:false}}}});
 }
 
-async function saveAndLoadRanking(total){
-  if(!db){
-    $("ranking").innerHTML=`<p class="small">Supabase未設定のため、ランキングはこの端末内だけのデモです。</p>`;
-    const local=JSON.parse(localStorage.getItem("localRanking")||"[]");
-    local.push({name:state.name,total,created_at:new Date().toISOString()});
-    local.sort((a,b)=>b.total-a.total); local.splice(20);
-    localStorage.setItem("localRanking",JSON.stringify(local));
-    renderRanking(local); return;
-  }
-  const {error}=await db.from("scores").insert({name:state.name,total,breakdown:state.results});
-  if(error){console.error(error); $("ranking").textContent="ランキング保存に失敗しました。"; return;}
-  const {data}=await db.from("scores").select("name,total,created_at").order("total",{ascending:false}).order("created_at",{ascending:true}).limit(20);
-  renderRanking(data||[]);
-}
-function renderRanking(rows){
-  $("ranking").innerHTML=rows.map((r,i)=>`<div class="rank"><b>${i+1}位</b>　${esc(r.name)}　<b>${r.total}点</b><span class="small">　${new Date(r.created_at).toLocaleString("ja-JP")}</span></div>`).join("");
-}
-$("retryBtn").onclick=()=>location.reload();
+// --- 1. ランキング読み込み・描画の共通処理 ---
+async function loadAndRenderRanking() {
+  let rows = [];
 
+  if (!db) {
+    // Supabase未設定の場合（localStorageのデモデータ）
+    rows = JSON.parse(localStorage.getItem("localRanking") || "[]");
+  } else {
+    // Supabaseから上位20件を取得
+    const { data, error } = await db
+      .from("scores")
+      .select("name,total,created_at")
+      .order("total", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(20);
+
+    if (error) {
+      console.error(error);
+      if ($("ranking")) $("ranking").textContent = "ランキング取得に失敗しました。";
+      if ($("startRanking")) $("startRanking").textContent = "ランキング取得に失敗しました。";
+      return;
+    }
+    rows = data || [];
+  }
+
+  // 開始画面と結果画面の両方の要素にランキングを描画
+  renderRankingToElement("ranking", rows);
+  renderRankingToElement("startRanking", rows);
+}
+
+// 指定した要素IDにランキングHTMLを差し込む補助関数
+function renderRankingToElement(elementId, rows) {
+  const el = $(elementId);
+  if (!el) return;
+
+  if (!db) {
+    el.innerHTML = `<p class="small">Supabase未設定のため、デモ表示です。</p>` +
+      rows.map((r, i) => `<div class="rank"><b>${i + 1}位</b> ${esc(r.name)} <b>${r.total}点</b><span class="small"> ${new Date(r.created_at).toLocaleString("ja-JP")}</span></div>`).join("");
+  } else {
+    el.innerHTML = rows.map((r, i) => `<div class="rank"><b>${i + 1}位</b> ${esc(r.name)} <b>${r.total}点</b><span class="small"> ${new Date(r.created_at).toLocaleString("ja-JP")}</span></div>`).join("");
+  }
+}
+
+// --- 2. スコア保存用の関数 ---
+async function saveScore(total) {
+  if (!db) {
+    const local = JSON.parse(localStorage.getItem("localRanking") || "[]");
+    local.push({ name: state.name, total, created_at: new Date().toISOString() });
+    local.sort((a, b) => b.total - a.total);
+    local.splice(20);
+    localStorage.setItem("localRanking", JSON.stringify(local));
+    return;
+  }
+
+  const { error } = await db.from("scores").insert({
+    name: state.name,
+    total,
+    breakdown: state.results
+  });
+
+  if (error) {
+    console.error(error);
+  }
+}
+
+// --- 3. finish関数での呼び出し変更 ---
+async function finish() {
+  // ...（前後の表示切り替えやレベル判定処理はそのまま）...
+
+  // スコア保存後にランキングを再読み込み・反映
+  await saveScore(total);
+  await loadAndRenderRanking();
+}
+
+// --- 4. ページ読み込み時に初期実行 ---
+document.addEventListener("DOMContentLoaded", () => {
+  loadAndRenderRanking();
+});
