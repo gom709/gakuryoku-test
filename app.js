@@ -72,12 +72,12 @@ async function submitSubject(auto){
   });
   state.results[subject]=score;
   if(auto) alert(`${subject}は制限時間終了です。回答を締め切りました。`);
-  if(state.subjectIndex<6){
-    state.subjectIndex++;
-    startSubject();
-  }else{
-    await finish();
-  }
+    if(state.subjectIndex < SUBJECTS.length - 1){
+      state.subjectIndex++;
+      startSubject();
+    }else{
+      await finish();
+    }
 }
 
 async function finish() {
