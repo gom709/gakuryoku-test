@@ -30,10 +30,6 @@ function esc(s) {
   }[c]));
 }
 
-function shuffle(a) {
-  return a.slice().sort(() => Math.random() - 0.5);
-}
-
 window.onload = function() {
   if ($("startBtn")) {
     $("startBtn").onclick = () => {
@@ -52,6 +48,16 @@ window.onload = function() {
       if ($("quiz")) $("quiz").classList.remove("hidden");
       
       startSubject();
+    };
+  }
+
+  // 「もう一度受験する」ボタンの処理を追加・初期化
+  if ($("retryBtn")) {
+    $("retryBtn").onclick = () => {
+      if ($("result")) $("result").classList.add("hidden");
+      if ($("quiz")) $("quiz").classList.add("hidden");
+      if ($("start")) $("start").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     };
   }
   
