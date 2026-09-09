@@ -157,24 +157,24 @@ async function finish() {
 
   let levelTitle = "";
   let levelComment = "";
-  if (total >= 110) {
+  if (total >= 86) { // 約85%以上
     levelTitle = "👑 超人・教授レベル！";
     levelComment = "恐ろしい知性…！今すぐクイズ番組に出演するか、知識を鼻にかけて自慢して回りましょう！";
-  } else if (total >= 95) {
+  } else if (total >= 71) { // 約70%以上
     levelTitle = "🎓 高校生（進学校）レベル！";
     levelComment = "素晴らしい記憶力！大人の経験値と知識が見事に融合した、文句なしの秀才です。";
-  } else if (total >= 80) {
+  } else if (total >= 56) { // 約55%以上
     levelTitle = "🏫 中学3年生レベル！";
     levelComment = "高校受験なら余裕で合格圏内！社会人として十分すぎる教養をお持ちです。";
-  } else if (total >= 60) {
+  } else if (total >= 41) { // 約40%以上
     levelTitle = "🎒 小学6年生レベル！";
     levelComment = "義務教育の基礎はバッチリ！「忘れてたけど見覚えはある」をしっかり正解に繋げられました。";
-  } else if (total >= 40) {
+  } else if (total >= 26) { // 約25%以上
     levelTitle = "🐥 小学3年生レベル！";
     levelComment = "あれ…？昔習ったはずなのに…？社会に出て使わない知識は脳のゴミ箱に捨ててきたタイプですね！";
   } else {
     levelTitle = "🐣 ひよこ組（未就学児）レベル！";
-    levelComment = "大丈夫、社会で生きていくのに「台形の面積公式」はめったに使いません！伸びしろしかありません！";
+    levelComment = "大丈夫、社会で生きていくのに「台形の面積公式」は滅多に使いません！伸びしろしかありません！";
   }
 
   if ($("summary")) {
