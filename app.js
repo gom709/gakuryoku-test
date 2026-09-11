@@ -265,7 +265,7 @@ async function loadAndRenderRanking() {
       .select("name,total,created_at")
       .order("total", { ascending: false })
       .order("created_at", { ascending: true })
-      .limit(20);
+      .limit(30);
       
     if (error) {
       console.error(error);
@@ -299,7 +299,7 @@ async function saveScore(total) {
     const local = JSON.parse(localStorage.getItem("localRanking") || "[]");
     local.push({ name: state.name, total, created_at: new Date().toISOString() });
     local.sort((a, b) => b.total - a.total);
-    local.splice(20);
+    local.splice(30);
     localStorage.setItem("localRanking", JSON.stringify(local));
     return;
   }
